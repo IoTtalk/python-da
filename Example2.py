@@ -1,6 +1,6 @@
 import time, DAN, requests, random
 
-ServerIP = '140.113.215.6' #Change to your IoTtalk IP, or None for autoSearching
+ServerIP = 'IP' #Change to your IoTtalk IP, or None for autoSearching
 Reg_addr= None # if None, Reg_addr = MAC address
 
 DAN.profile['dm_name']='Dummy_Device'
