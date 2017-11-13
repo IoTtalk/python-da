@@ -77,7 +77,7 @@ class DAN:
         if profile == None or IP == None:
             print('IoTtalk server IP and device profile can not be ignore!')
             return
-        self.mac = mac if addr != None else self.get_mac_addr()    
+        self.mac = addr if addr != None else self.get_mac_addr()    
         self.profile = profile
         print(profile)
         csmapi.ENDPOINT = 'http://' + IP + ':9999'
