@@ -118,6 +118,15 @@ class DAN:
             return None
         else:
             return alias
+
+    def set_alias(self, FEATURE_NAME, alias):
+        try:
+            alias = csmapi.set_alias(self.mac, FEATURE_NAME, alias)
+        except Exception as e:
+            print (e)
+            return None
+        else:
+            return alias        
         
     def deregister():
         return csmapi.deregister(self.mac)
