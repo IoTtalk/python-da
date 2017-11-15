@@ -38,6 +38,18 @@ def pull(mac_addr, df_name):
     return r.json()['samples']
 
 
+def get_alias(mac_addr, df_name):
+    r = IoTtalk.get(ENDPOINT + '/get_alias/' + mac_addr + '/' + df_name, timeout=TIMEOUT)
+    if r.status_code != 200: raise CSMError(r.text)
+    return r.json()['alias_name']
+
+
+def set_alias(mac_addr, df_name, s):
+    r = IoTtalk.get(ENDPOINT + '/set_alias/' + mac_addr + '/' + df_name + '/alias?name=' + s, timeout=TIMEOUT)
+    if r.status_code != 200: raise CSMError(r.text)
+    return True
+
+
 def tree():
     r = IoTtalk.get(ENDPOINT + '/tree')
     if r.status_code != 200: raise CSMError(r.text)
