@@ -1,4 +1,4 @@
-import requests, time, csmapi, random, threading, socket, uuid
+import requests, time, CSMAPI, random, threading, socket, uuid
 
 class DAN:
     def __init__(self):
@@ -8,18 +8,19 @@ class DAN:
         self.timestamp = {}
         self.profile = {}
         self.mac = None
+        self.csmapi = CSMAPI.CSMAPI()
 
     def control_channel(self):
         while True:
             time.sleep(2)
             try:
-                ch = csmapi.pull(self.mac, '__Ctl_O__')
+                ch = self.csmapi.pull(self.mac, '__Ctl_O__')
                 if ch != []:
                     if self.control_channel_timestamp == ch[0][0]: continue
                     self.control_channel_timestamp = ch[0][0]
                     self.state = ch[0][1][0]
                     if self.state == 'SET_DF_STATUS' :
-                        csmapi.push(self.mac, '__Ctl_I__',['SET_DF_STATUS_RSP',{'cmd_params':ch[0][1][1]['cmd_params']}])
+                        self.csmapi.push(self.mac, '__Ctl_I__',['SET_DF_STATUS_RSP',{'cmd_params':ch[0][1][1]['cmd_params']}])
                         DF_STATUS = list(ch[0][1][1]['cmd_params'][0])
                         self.selectedDF = []
                         index=0            
@@ -47,11 +48,11 @@ class DAN:
             data, addr = s.recvfrom(1024)
             if str(data.decode()) == 'easyconnect':
                 EASYCONNECT_HOST = 'http://{}:9999'.format(addr[0])
-                csmapi.ENDPOINT=EASYCONNECT_HOST
-                #print('IoTtalk server = {}'.format(csmapi.ENDPOINT))
+                self.csmapi.ENDPOINT=EASYCONNECT_HOST
+                #print('IoTtalk server = {}'.format(self.CSMAPI.ENDPOINT))
 
     def register_device(self):
-        if csmapi.ENDPOINT == None: detect_local_ec()
+        if self.csmapi.ENDPOINT == None: detect_local_ec()
 
         if self.profile['d_name'] == None: 
             self.profile['d_name']= str(int(random.uniform(1, 100)))+'.'+ self.profile['dm_name']
@@ -59,8 +60,8 @@ class DAN:
         for i in self.profile['df_list']: 
             self.timestamp[i] = ''
 
-        print('IoTtalk Server = {}'.format(csmapi.ENDPOINT))
-        if csmapi.register(self.mac, self.profile):
+        print('IoTtalk Server = {}'.format(self.csmapi.ENDPOINT))
+        if self.csmapi.register(self.mac, self.profile):
             print ('This device has successfully registered.')
             print ('Device name = ' + self.profile['d_name'])
 
@@ -80,7 +81,7 @@ class DAN:
         self.mac = addr if addr != None else self.get_mac_addr()    
         self.profile = profile
         print(profile)
-        csmapi.ENDPOINT = 'http://' + IP + ':9999'
+        self.csmapi.ENDPOINT = 'http://' + IP + ':9999'
         success = False
         while not success:
             try:
@@ -93,7 +94,7 @@ class DAN:
 
     def pull(self, FEATURE_NAME):
 
-        data = csmapi.pull(self.mac, FEATURE_NAME) if self.state == 'RESUME' else []
+        data = self.csmapi.pull(self.mac, FEATURE_NAME) if self.state == 'RESUME' else []
 
         if data != []:
             if self.timestamp[FEATURE_NAME] == data[0][0]:
@@ -107,12 +108,12 @@ class DAN:
 
     def push(self, FEATURE_NAME, *data):
         if self.state == 'RESUME':
-            return csmapi.push(self.mac, FEATURE_NAME, list(data))
+            return self.csmapi.push(self.mac, FEATURE_NAME, list(data))
         else: return None
 
     def get_alias(self, FEATURE_NAME):
         try:
-            alias = csmapi.get_alias(self.mac, FEATURE_NAME)
+            alias = self.csmapi.get_alias(self.mac, FEATURE_NAME)
         except Exception as e:
             print (e)
             return None
@@ -121,7 +122,7 @@ class DAN:
 
     def set_alias(self, FEATURE_NAME, alias):
         try:
-            alias = csmapi.set_alias(self.mac, FEATURE_NAME, alias)
+            alias = self.csmapi.set_alias(self.mac, FEATURE_NAME, alias)
         except Exception as e:
             print (e)
             return None
@@ -129,4 +130,4 @@ class DAN:
             return alias        
         
     def deregister():
-        return csmapi.deregister(self.mac)
+        return self.csmapi.deregister(self.mac)
