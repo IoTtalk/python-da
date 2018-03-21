@@ -129,5 +129,5 @@ class DAN:
         else:
             return alias        
         
-    def deregister():
+    def deregister(self):
         return self.csmapi.deregister(self.mac)
